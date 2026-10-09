@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birthday Surprise 🎉</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body {
+      margin: 0; padding: 0;
+      background: linear-gradient(135deg, #ff758c, #ff7eb3);
+      min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      overflow-x: hidden;
+    }
+    .container {
+      width: 90%; max-width: 380px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px; padding: 25px 20px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+      text-align: center; position: relative;
+    }
+    .card { display: flex; flex-direction: column; align-items: center; animation: fadeIn 0.4s ease-in-out; }
+    .hidden { display: none !important; }
+    .avatar-box {
+      width: 90px; height: 90px; border-radius: 50%;
+      border: 3px dashed #ff477e; display: flex;
+      justify-content: center; align-items: center;
+      font-size: 40px; margin-bottom: 12px; background: #fff0f5;
+    }
+    h2 { color: #d63384; margin: 10px 0 5px 0; font-size: 20px; }
+    p { color: #555; font-size: 13px; margin-bottom: 15px; }
+    input {
+      width: 100%; padding: 12px; border: 2px solid #ff477e;
+      border-radius: 12px; text-align: center; font-size: 15px;
+      margin-bottom: 10px; outline: none;
+    }
+    .hint-text { font-size: 12px; color: #888; margin-bottom: 15px; display: none; }
+    .btn {
+      background: linear-gradient(45deg, #ff477e, #ff758c);
+      color: white; border: none; padding: 12px 20px;
+      border-radius: 25px; font-size: 14px; font-weight: 600;
+      cursor: pointer; width: 100%; box-shadow: 0 4px 12px rgba(255, 71, 126, 0.3);
+      margin-top: 5px;
+    }
+    .big-num { font-size: 65px; color: #ff477e; font-weight: 700; margin: 10px 0; }
+    
+    .flip-grid { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 15px; }
+    .flip-card {
+      background: #ffe6eb; border-radius: 12px; padding: 15px;
+      color: #d63384; font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+
+    .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; margin-bottom: 15px; }
+    .img-card {
+      width: 100%; height: 90px; border-radius: 10px;
+      object-fit: cover; border: 2px solid #ff477e;
+    }
+
+    .balloon-box { display: flex; justify-content: center; gap: 15px; margin: 20px 0; font-size: 35px; cursor: pointer; }
+
+    .scratch-container {
+      position: relative; width: 260px; height: 130px;
+      margin: 10px 0; border-radius: 12px; overflow: hidden;
+    }
+    .scratch-secret {
+      position: absolute; width: 100%; height: 100%;
+      background: #ffe6eb; display: flex; align-items: center;
+      justify-content: center; color: #d63384; font-weight: bold;
+      padding: 10px; font-size: 13px;
+    }
+    canvas { position: absolute; top: 0; left: 0; cursor: pointer; }
+
+    .cake-box { font-size: 50px; margin: 10px 0; cursor: pointer; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio Source -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="song.mp3" type="audio/mpeg">
+  </audio>
+
+  <div class="container">
+
+    <!-- Screen 0: Password Lock -->
+    <div id="screen-lock" class="card">
+      <div class="avatar-box">🔒</div>
+      <h2>Surprise Unlocking 💖</h2>
+      <p>Enter the passcode to open your surprise!</p>
+      <input type="password" id="passInput" placeholder="Enter password...">
+      <p id="hintBox" class="hint-text">💡 Hint: Special Date and Time</p>
+      <button class="btn" onclick="checkPass()">Unlock Surprise ✨</button>
+      <p id="errorMsg" style="color:#ff2e63; display:none; margin-top:8px; font-size:12px;">Wrong Code!</p>
+      <button class="btn" style="background:transparent; color:#888; box-shadow:none; font-size:11px;" onclick="showHint()">Need a hint?</button>
+    </div>
+
+    <!-- Screen 1: Tap Gift Box -->
+    <div id="screen-1" class="card hidden">
+      <div class="avatar-box" style="cursor:pointer;" onclick="nextScreen(2)">🎁</div>
+      <h2>Tap the Gift Box!</h2>
+      <p>Click on the gift box above to open your surprise ✨</p>
+    </div>
+
+    <!-- Screen 2: Welcome -->
+    <div id="screen-2" class="card hidden">
+      <div class="avatar-box">🥳</div>
+      <h2>Hey Madina! ✨</h2>
+      <p>I made something special for your birthday...</p>
+      <button class="btn" onclick="nextScreen(3)">Open Surprise 🎁</button>
+    </div>
+
+    <!-- Screen 3: Ready Question -->
+    <div id="screen-3" class="card hidden">
+      <div class="avatar-box">🌸</div>
+      <h2>Ready for it, Madina? 🥺</h2>
+      <p>Are you ready to see your surprise?</p>
+      <button class="btn" onclick="nextScreen(5)" style="margin-bottom:8px;">Yes ✨</button>
+      <button class="btn" onclick="nextScreen(4)" style="background:#ccc; box-shadow:none;">No</button>
+    </div>
+
+    <!-- Screen 4: Fun No Option -->
+    <div id="screen-4" class="card hidden">
+      <div class="avatar-box">😼</div>
+      <h2>Not an option! 😤</h2>
+      <p>You have to see it anyway, Madina! 😄</p>
+      <button class="btn" onclick="nextScreen(5)">Okay Fine, Yes 💗</button>
+    </div>
+
+    <!-- Screen 5: Countdown -->
+    <div id="screen-5" class="card hidden">
+      <div class="avatar-box">✨</div>
+      <h2>Get ready Madina...</h2>
+      <div id="countdown" class="big-num">3</div>
+    </div>
+
+    <!-- Screen 6: Memory Cards -->
+    <div id="screen-6" class="card hidden">
+      <h2>Tap Cards to Reveal 💭</h2>
+      <p>Click on each note to see a message!</p>
+      <div class="flip-grid">
+        <div class="flip-card" onclick="this.innerText='Best memories together, Madina! ✨'">Memory Note #1 ✉️</div>
+        <div class="flip-card" onclick="this.innerText='Always stay happy and blessed! 🌟'">Memory Note #2 ✉️</div>
+        <div class="flip-card" onclick="this.innerText='Thanks for being a great friend! 🎉'">Memory Note #3 ✉️</div>
+      </div>
+      <button class="btn" onclick="nextScreen(7)">Continue ➔</button>
+    </div>
+
+    <!-- Screen 7: Photo Gallery (3 Photos) -->
+    <div id="screen-7" class="card hidden">
+      <h2>Good Times 📸</h2>
+      <p>A few moments captured with Madina!</p>
+      <div class="gallery">
+        <img src="pic1.jpg" alt="Photo 1" class="img-card" onerror="this.src='https://via.placeholder.com/100/ff758c/ffffff?text=Pic+1'">
+        <img src="pic2.jpg" alt="Photo 2" class="img-card" onerror="this.src='https://via.placeholder.com/100/ff758c/ffffff?text=Pic+2'">
+        <img src="pic3.jpg" alt="Photo 3" class="img-card" onerror="this.src='https://via.placeholder.com/100/ff758c/ffffff?text=Pic+3'">
+      </div>
+      <button class="btn" onclick="nextScreen(8)">Continue ➔</button>
+    </div>
+
+    <!-- Screen 8: Pop Balloons -->
+    <div id="screen-8" class="card hidden">
+      <h2>Pop a Balloon! 🎈</h2>
+      <p>Tap a balloon to pop it, Madina!</p>
+      <div class="balloon-box">
+        <span onclick="popB(this)">🎈</span>
+        <span onclick="popB(this)">🎈</span>
+        <span onclick="popB(this)">🎈</span>
+      </div>
+      <p id="balloonMsg" style="font-weight:600; color:#d63384; min-height:20px;"></p>
+      <button class="btn" onclick="nextScreen(9)">Continue ➔</button>
+    </div>
+
+    <!-- Screen 9: Scratch Card -->
+    <div id="screen-9" class="card hidden">
+      <h2>Scratch to Reveal 💌</h2>
+      <p>Scratch the card below with your finger!</p>
+      <div class="scratch-container">
+        <div class="scratch-secret">
+          <span>Madina, you make life brighter! Wishing you the best birthday ever! 🎉✨</span>
+        </div>
+        <canvas id="scratchCanvas" width="260" height="130"></canvas>
+      </div>
+      <button class="btn" onclick="nextScreen(10)">Continue ➔</button>
+    </div>
+
+    <!-- Screen 10: Blow Candles -->
+    <div id="screen-10" class="card hidden">
+      <h2>Blow the Candles 🎂</h2>
+      <p>Tap the candles to blow them out, Madina!</p>
+      <div class="cake-box" id="cakeElem" onclick="blowCandles()">🎂🕯️🕯️</div>
+      <p id="cakeMsg">Tap to blow candles!</p>
+      <button class="btn" onclick="nextScreen(11)">See Final Wish ➔</button>
+    </div>
+
+    <!-- Screen 11: Final Wish -->
+    <div id="screen-11" class="card hidden">
+      <div class="avatar-box">🎉</div>
+      <h2>Happy Birthday, Madina! 🥳</h2>
+      <p>Hope your day is filled with joy, laughter, and lots of cake! Have an awesome year ahead! ✨</p>
+      <p style="font-size:11px; color:#aaa; margin-top:10px;">— made with care, just for you —</p>
+    </div>
+
+  </div>
+
+  <script>
+    const correctPassword = "6 January 04:00_04:35";
+
+    function showHint() {
+      document.getElementById("hintBox").style.display = "block";
+    }
+
+    function checkPass() {
+      const input = document.getElementById("passInput").value;
+      if (input === correctPassword) {
+        document.getElementById("screen-lock").classList.add("hidden");
+        document.getElementById("screen-1").classList.remove("hidden");
+        
+        const audio = document.getElementById("bgMusic");
+        audio.play().catch(e => console.log("Autoplay waiting for tap"));
+      } else {
+        document.getElementById("errorMsg").style.display = "block";
+      }
+    }
+
+    function nextScreen(screenNum) {
+      document.querySelectorAll('.card').forEach(card => card.classList.add('hidden'));
+      
+      if (screenNum === 5) {
+        document.getElementById("screen-5").classList.remove("hidden");
+        startCountdown();
+      } else {
+        document.getElementById(`screen-${screenNum}`).classList.remove("hidden");
+        if (screenNum === 9) initScratchCard();
+      }
+    }
+
+    function startCountdown() {
+      let count = 3;
+      const numElem = document.getElementById("countdown");
+      const timer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          numElem.innerText = count;
+        } else {
+          clearInterval(timer);
+          nextScreen(6);
+        }
+      }, 1000);
+    }
+
+    function popB(elem) {
+      elem.innerText = "💥";
+      const msgs = ["So glad you exist, Madina! ✨", "You make life brighter! 🌟", "Awesome human ever! 🥳"];
+      document.getElementById("balloonMsg").innerText = msgs[Math.floor(Math.random() * msgs.length)];
+    }
+
+    function blowCandles() {
+      document.getElementById("cakeElem").innerText = "🎂💨";
+      document.getElementById("cakeMsg").innerText = "Wish Made! 🎉";
+    }
+
+    function initScratchCard() {
+      const canvas = document.getElementById("scratchCanvas");
+      const ctx = canvas.getContext("2d");
+      
+      ctx.fillStyle = "#b0bec5";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 14px Poppins, sans-serif";
+      ctx.fillText("✨ Scratch Here ✨", 65, 70);
+
+      let isDrawing = false;
+      function scratch(e) {
+        if (!isDrawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.arc(x, y, 16, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      canvas.addEventListener("mousedown", () => isDrawing = true);
+      canvas.addEventListener("mouseup", () => isDrawing = false);
+      canvas.addEventListener("mousemove", scratch);
+      canvas.addEventListener("touchstart", () => isDrawing = true);
+      canvas.addEventListener("touchend", () => isDrawing = false);
+      canvas.addEventListener("touchmove", scratch);
+    }
+  </script>
+</body>
+</html>
+
